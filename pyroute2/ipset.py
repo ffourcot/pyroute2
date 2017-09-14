@@ -63,6 +63,21 @@ def _nlmsg_error(msg):
     return msg['header']['type'] == NLMSG_ERROR
 
 
+class PortRange(object):
+    """ A simple container for port range with optional protocol """
+    def __init__(self, begin, end, protocol=None):
+        self.begin = begin
+        self.end = end
+        self.protocol = protocol
+
+
+class PortEntry(object):
+    """ A simple container for port entry wirth optional protocol """
+    def __init__(self, port, protocol=None):
+        self.port = port
+        self.protocol = protocol
+
+
 class IPSet(NetlinkSocket):
     '''
     NFNetlink socket (family=NETLINK_NETFILTER).
@@ -211,7 +226,7 @@ class IPSet(NetlinkSocket):
         # function like a command line), and tupple/list
         if isinstance(entry, basestring):
             entry = entry.split(',')
-        if isinstance(entry, int):
+        if isinstance(entry, (int, PortRange, PortEntry)):
             entry = [entry]
 
         for e, t in zip(entry, etype.split(',')):
@@ -234,7 +249,14 @@ class IPSet(NetlinkSocket):
             elif t == "mac":
                 attrs += [['IPSET_ATTR_ETHER', e]]
             elif t == "port":
-                attrs += [['IPSET_ATTR_PORT', e]]
+                if isinstance(e, PortRange):
+                    attrs += [['IPSET_ATTR_PORT_FROM', e.begin]]
+                    attrs += [['IPSET_ATTR_PORT_TO', e.end]]
+                elif isinstance(e, PortEntry):
+                    attrs += [['IPSET_ATTR_PORT', e.port]]
+                else:
+                    attrs += [['IPSET_ATTR_PORT', e]]
+
         return attrs
 
     def _add_delete_test(self, name, entry, family, cmd, exclusive,

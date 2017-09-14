@@ -1,6 +1,6 @@
 import errno
 from time import sleep
-from pyroute2.ipset import IPSet
+from pyroute2.ipset import IPSet, PortRange
 from pyroute2.netlink.exceptions import NetlinkError
 from pyroute2.netlink.nfnetlink.ipset import IPSET_FLAG_WITH_FORCEADD
 from pyroute2.netlink.nfnetlink.ipset import IPSET_ERR_TYPE_SPECIFIC
@@ -368,6 +368,12 @@ class TestIPSet(object):
         self.ip.create(name, stype=ipset_type, bitmap_ports_range=port_range)
         self.ip.add(name, 1002, etype=etype)
         assert self.ip.test(name, 1002, etype=etype)
+
+        add_range = PortRange(2000, 3000, protocol=None)
+        self.ip.add(name, add_range, etype=etype)
+        assert self.ip.test(name, 2001, etype=etype)
+        assert self.ip.test(name, 3000, etype=etype)
+        assert not self.ip.test(name, 4000, etype=etype)
 
         try:
             self.ip.add(name, 18, etype=etype)
