@@ -68,14 +68,17 @@ class PortRange(object):
     def __init__(self, begin, end, protocol=None):
         self.begin = begin
         self.end = end
-        self.protocol = protocol
+
+        if protocol:
+            self.protocol = IPPROTO_TCP if protocol == 'tcp' else IPPROTO_UDP
 
 
 class PortEntry(object):
     """ A simple container for port entry wirth optional protocol """
     def __init__(self, port, protocol=None):
         self.port = port
-        self.protocol = protocol
+        if protocol:
+            self.protocol = IPPROTO_TCP if protocol == 'tcp' else IPPROTO_UDP
 
 
 class IPSet(NetlinkSocket):
@@ -255,7 +258,12 @@ class IPSet(NetlinkSocket):
                 elif isinstance(e, PortEntry):
                     attrs += [['IPSET_ATTR_PORT', e.port]]
                 else:
-                    attrs += [['IPSET_ATTR_PORT', e]]
+                    attrs += [['IPSET_ATTR_PORT', int(e)]]
+
+                # Dont set IPSET_ATTR_PROTO if type bitmap:port
+                if etype != 'port':
+                    attrs += [['IPSET_ATTR_PROTO', e.protocol]]
+
 
         return attrs
 
