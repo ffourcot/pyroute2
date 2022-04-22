@@ -522,6 +522,9 @@ NLM_F_REPLACE = 0x100  # Override existing
 NLM_F_EXCL = 0x200  # Do not touch, if it exists
 NLM_F_CREATE = 0x400  # Create, if it does not exist
 NLM_F_APPEND = 0x800  # Add to end of list
+# Modifiers to DELETE request
+NLM_F_NONREC = 0x100  # Do not delete recursively
+NLM_F_BULK = 0x200  # Delete multiple objects
 
 NLM_F_CAPPED = 0x100
 NLM_F_ACK_TLVS = 0x200
