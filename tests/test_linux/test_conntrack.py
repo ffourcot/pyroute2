@@ -28,7 +28,11 @@ class Client(object):
 
     def __init__(self, address, port):
         self.ss = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.ss.connect((address, port))
+        try:
+            self.ss.connect((address, port))
+        except Exception:
+            self.ss.close()
+            raise
 
     def stop(self):
         self.ss.send(b'\x00' * 16)
